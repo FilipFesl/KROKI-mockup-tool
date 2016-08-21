@@ -35,6 +35,7 @@ import kroki.app.action.AboutAction;
 import kroki.app.action.CopyAction;
 import kroki.app.action.CutAction;
 import kroki.app.action.DBConneectionSettingsAction;
+import kroki.app.action.DBJarConnectionDialogAction;
 import kroki.app.action.ExitAction;
 import kroki.app.action.ExportEclipseProjectAction;
 import kroki.app.action.ExportEclipseUMLDiagramAction;
@@ -43,6 +44,7 @@ import kroki.app.action.ExportSwingAction;
 import kroki.app.action.ExportWebAction;
 import kroki.app.action.HelpAction;
 import kroki.app.action.ImportEclipseUMLDiagramAction;
+import kroki.app.action.ImportFromDatabaseAction;
 import kroki.app.action.NewFileAction;
 import kroki.app.action.NewProjectAction;
 import kroki.app.action.OpenFileAction;
@@ -297,7 +299,8 @@ public class KrokiMockupToolFrame extends JFrame {
 			file.add(importFileMenu);
 
 			importFileMenu.add(new ImportEclipseUMLDiagramAction());
-
+			importFileMenu.add(new ImportFromDatabaseAction());
+			
 			JMenu exportFileMenu=new JMenu();
 			exportFileMenu.setName("export");
 			exportFileMenu.setText(StringResource.getStringResource("menu.file.submenu.export"));
@@ -349,7 +352,8 @@ public class KrokiMockupToolFrame extends JFrame {
 			project.add(run);
 			project.addSeparator();
 			project.add(new DBConneectionSettingsAction());
-
+			project.add(new DBJarConnectionDialogAction());
+			
 			JMenu help = new JMenu();
 			help.setName("help");
 			help.setText(StringResource.getStringResource("menu.help.name"));

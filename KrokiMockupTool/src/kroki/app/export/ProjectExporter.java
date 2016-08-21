@@ -4,7 +4,12 @@ import java.awt.Cursor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -138,6 +143,24 @@ public class ProjectExporter {
 		} catch (ModelAccessException e1) {
 			e1.printStackTrace();
 		}
+		
+		//move the jdbc jar to buildProject lib so it gets included in the main .jar file
+		if(!"".equals(proj.getDBConnectionProps().getJarLocation())){
+			Path jdbcFilePath = Paths.get(proj.getDBConnectionProps().getJarLocation());
+			String jdbcFileName = jdbcFilePath.getFileName().toString();
+			Path target = Paths.get(
+					file.getAbsolutePath()+
+						File.separator + ".." + File.separator + ".." +File.separator + // iterate down in the dir structure
+							"WebApp" + File.separator + "lib" + File.separator + jdbcFileName);
+			try {
+				Files.copy(jdbcFilePath, target);
+			} catch (FileAlreadyExistsException ex){	
+				System.out.println("Target file already exists : "+target);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		generateAppAndRepo(proj, message);
 		writeProjectName(proj.getLabel(), proj.getProjectDescription());
 		runAnt(file, proj, jarName, message);

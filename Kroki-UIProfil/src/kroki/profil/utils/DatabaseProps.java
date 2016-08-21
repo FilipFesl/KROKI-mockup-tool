@@ -17,7 +17,9 @@ public class DatabaseProps implements Serializable {
 	private String username;
 	private String password;
 	private String dialect;
-		
+	private String jdbcURL;
+	private String jarLocation;	
+	
 	public DatabaseProps() {
 		profile = 5;
 		driverClass = "org.h2.Driver";
@@ -27,6 +29,8 @@ public class DatabaseProps implements Serializable {
 		schema = "test";
 		username = "test";
 		password = "test";
+		jdbcURL = "";
+		setJarLocation("");
 	}
 	
 	public DatabaseProps(int profile, String driverClass, String host, int port, String schema, String username, String password, String dialect) {
@@ -39,8 +43,20 @@ public class DatabaseProps implements Serializable {
 		this.username = username;
 		this.password = password;
 		this.dialect = dialect;
+		this.jdbcURL = "";
+		this.setJarLocation("");
 	}
 
+	public DatabaseProps(String driverClass, String jdbcURL, String username, String password, String dialect, String jarLocation) {
+		super();
+		this.driverClass = driverClass;
+		this.username = username;
+		this.password = password;
+		this.dialect = dialect;
+		this.jdbcURL = jdbcURL;
+		this.jarLocation = jarLocation;
+	}
+	
 	public String getDriverClass() {
 		return driverClass;
 	}
@@ -103,5 +119,21 @@ public class DatabaseProps implements Serializable {
 
 	public void setDialect(String dialect) {
 		this.dialect = dialect;
+	}
+	
+	public String getJdbcURL() {
+		return jdbcURL;
+	}
+	
+	public void setJdbcURL(String jdbcURL) {
+		this.jdbcURL = jdbcURL;
+	}
+
+	public String getJarLocation() {
+		return jarLocation;
+	}
+
+	public void setJarLocation(String jarLocation) {
+		this.jarLocation = jarLocation;
 	}
 }

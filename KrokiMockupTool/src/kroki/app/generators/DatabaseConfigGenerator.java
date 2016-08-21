@@ -25,12 +25,12 @@ import freemarker.template.TemplateException;
  */
 public class DatabaseConfigGenerator {
 	
-	private DatabaseProps  parameters;
+	private static DatabaseProps  parameters;
 	private String date;
 	private String appPath;
 	
 	public DatabaseConfigGenerator(DatabaseProps props) {
-		this.parameters = props;
+		DatabaseConfigGenerator.parameters = props;
 		Date now = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy  H:mm");
 		date = formatter.format(now);
@@ -77,11 +77,18 @@ public class DatabaseConfigGenerator {
 		try {
 			String driver = parameters.getDriverClass();
 			String protocol = getProtocol(parameters.getProfile());
-			String url = "jdbc:" + protocol + "://" + parameters.getHost()  + ":" + parameters.getPort() + "/" + parameters.getSchema();
-			//if test profile is selected, generate test url
-			if(parameters.getProfile() == 5) {
-				url = "jdbc:h2:mem:test";
+			String url = "";
+			
+			if("".equals(parameters.getJdbcURL())){
+				url = "jdbc:" + protocol + "://" + parameters.getHost()  + ":" + parameters.getPort() + "/" + parameters.getSchema();
+				//if test profile is selected, generate test url
+				if(parameters.getProfile() == 5) {
+					url = "jdbc:h2:mem:test";
+				}
+			} else {
+				url = parameters.getJdbcURL();
 			}
+
 			String username = parameters.getUsername();
 			String password = parameters.getPassword();
 			String dialect = parameters.getDialect();
@@ -126,11 +133,16 @@ public class DatabaseConfigGenerator {
 		Map model = new TreeMap();
 		
 		String protocol = getProtocol(parameters.getProfile());
-		
-		String url = "jdbc:" + protocol + "://" + parameters.getHost()  + ":" + parameters.getPort() + "/" + parameters.getSchema();
-		if(parameters.getProfile() == 5) {
-			url = "jdbc:h2:mem:test";
+		String url ="";
+		if("".equals(parameters.getJdbcURL())) {
+			url = "jdbc:" + protocol + "://" + parameters.getHost()  + ":" + parameters.getPort() + "/" + parameters.getSchema();
+			if(parameters.getProfile() == 5) {
+				url = "jdbc:h2:mem:test";
+			}
+		} else {
+			url = parameters.getJdbcURL();
 		}
+
 		String username = parameters.getUsername();
 		String password = parameters.getPassword();
 		String driver = parameters.getDriverClass();
