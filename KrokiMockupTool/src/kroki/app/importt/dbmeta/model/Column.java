@@ -36,9 +36,14 @@ public class Column {
     private boolean partOfPK = false;
     private boolean partOfFK = false;
     private String type;
+    private int sqlDataType; //corresponds with java.sql.Types (jdbc types)
     private int length = 0;
     private int decimalDigits = 0;
     private boolean nullable = false;
+    
+    private String fkColumnName;
+    private String fkTableName;
+    
     /**
      * @return name.
      */
@@ -124,5 +129,32 @@ public class Column {
     public void setDecimalDigits(int aDecimalDigits) {
         decimalDigits = aDecimalDigits;
     }
+    /**
+     * @return
+     */
+	public int getSQLDataType() {
+		return sqlDataType;
+	}
+    /**
+     * @param aDecimalDigits
+     */
+	public void setSQLDataType(int sqlDataType) {
+		this.sqlDataType = sqlDataType;
+	}
 
+	public String getFkColumnName() {
+		return fkColumnName;
+	}
+	
+	public void setFkColumnName(String fkColumnName) {
+		this.fkColumnName = fkColumnName;
+	}
+	
+	public String getFkTableName() {
+		return fkTableName;
+	}
+	
+	public void setFkTableName(String fkTableName) {
+		this.fkTableName = fkTableName;
+	}
 }

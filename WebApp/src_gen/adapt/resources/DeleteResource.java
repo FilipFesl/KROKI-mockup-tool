@@ -13,6 +13,7 @@ import adapt.core.AppCache;
 import adapt.enumerations.OpenedAs;
 import adapt.enumerations.PanelType;
 import adapt.model.panel.AdaptStandardPanel;
+import adapt.util.ejb.EntityHelper;
 import adapt.util.ejb.PersisenceHelper;
 import adapt.util.xml_readers.PanelReader;
 
@@ -30,7 +31,7 @@ public class DeleteResource extends BaseResource {
 		if(panelName != null && delId != null) {
 			AdaptStandardPanel panel = (AdaptStandardPanel) PanelReader.loadPanel(panelName, PanelType.STANDARDPANEL, null, OpenedAs.DEFAULT);
 			if(panel != null) {
-				remove(panel.getEntityBean().getEntityClass().getName(), Long.parseLong(delId));
+				remove(panel.getEntityBean().getEntityClass().getName(), delId);
 			}else {
 				addToDataModel("css", "messageError");
 				addToDataModel("message", "Unable to delete entry. Panel NULL");
@@ -42,11 +43,14 @@ public class DeleteResource extends BaseResource {
 		super.handleGet();
 	}
 
-	private void remove(String entityName, Long id) {
+	private void remove(String entityName, String id) {
 		EntityManager em = PersisenceHelper.createEntityManager();
 		em.getTransaction().begin();
 		String q = "FROM " + entityName + " x WHERE x.id=:did";
-		Object o = em.createQuery(q).setParameter("did", id).getSingleResult();
+		
+		Object castId = EntityHelper.getTypeOfIdForEJB(entityName, id);
+		
+		Object o = em.createQuery(q).setParameter("did", castId).getSingleResult();
 		em.remove(o);
 		try {
 			em.getTransaction().commit();

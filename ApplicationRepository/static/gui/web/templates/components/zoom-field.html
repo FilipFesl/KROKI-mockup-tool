@@ -4,8 +4,10 @@
 <#else>
   	<#assign width = 83/attribute.columns?size>
 </#if>
-<input id="${attribute.fieldName}-id" name="${attribute.fieldName}" class="zoomInputs" type="text" readonly="readonly" style="width: ${width?floor}%" <#if zoomEditMap??><#if zoomEditMap?has_content><#if zoomEditMap[attribute.fieldName]["id"]??>value="${zoomEditMap[attribute.fieldName]["id"]}"<#else>value="None"</#if></#if><#else>value="ID"</#if>>
 <#list attribute.columns as column>
+<#if column.key == true>
+<input id="${attribute.fieldName}-${column.fieldName}" name="${attribute.fieldName}" class="zoomInputs" type="text" readonly="readonly" style="width: ${width?floor}%" <#if zoomEditMap??><#if zoomEditMap?has_content><#if zoomEditMap[attribute.fieldName][column.fieldName]??>value="${zoomEditMap[attribute.fieldName][column.fieldName]}"<#else>value="None"</#if></#if><#else>value="ID"</#if>>
+</#if>
 <#if column.hidden == false>
 <input id="${attribute.fieldName}-${column.fieldName}" class="zoomInputs" type="text" readonly="readonly" style="width: ${width?floor}%" <#if zoomEditMap??><#if zoomEditMap?has_content><#if zoomEditMap[attribute.fieldName][column.fieldName]??>value="${zoomEditMap[attribute.fieldName][column.fieldName]}"<#else>value="None"</#if></#if><#else>value="${column.label}"</#if>>
 </#if>

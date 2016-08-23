@@ -40,8 +40,8 @@ import java.util.Vector;
  */
 public class Tables {
 
-    Hashtable tables;
-    Vector tablesList;
+    Hashtable<String, Table> tables;
+    Vector<Table> tablesList;
     boolean dirty = false;
     
     /**
@@ -49,7 +49,7 @@ public class Tables {
      */
     public Tables() {
         super();
-        tables = new Hashtable();
+        tables = new Hashtable<String, Table>();
         tablesList = null;
     }
     /**
@@ -60,14 +60,18 @@ public class Tables {
      * @throws SQLException
      */
     public void readFromDB(Connection aConn) throws SQLException {
-        tables = new Hashtable();
-        tablesList = new Vector(10, 10);
+        tables = new Hashtable<String, Table>();
+        tablesList = new Vector<Table>(10, 10);
         DatabaseMetaData dbMeta = aConn.getMetaData();
         String[] tableKind = {"TABLE"};
         ResultSet rst = dbMeta.getTables(null, null, null, tableKind);
 	    while(rst.next()){
-	            putTable(new Table(aConn, rst.getString("TABLE_NAME")));
+	    	putTable(new Table(aConn, rst.getString("TABLE_NAME")));
     	}
+	    
+	    for(Table table : tablesList){
+	    	table.calculateFkRefs();
+	    }
 	    setDirty(true);
     }
     
@@ -105,12 +109,12 @@ public class Tables {
         return (Table) tablesList.elementAt(aArg0);
         
     }
-    public Vector getTablesList() {
+    public Vector<Table> getTablesList() {
         return tablesList;
     }
-    public void setTablesList(Vector aTablesList) {
+    public void setTablesList(Vector<Table> aTablesList) {
         tablesList = aTablesList;
-        tables = new Hashtable();
+        tables = new Hashtable<String, Table>();
         Enumeration iter = tablesList.elements();
         while(iter.hasMoreElements()){
             Table tbl = (Table)iter.nextElement();

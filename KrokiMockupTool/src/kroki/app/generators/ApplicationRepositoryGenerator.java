@@ -33,12 +33,12 @@ public class ApplicationRepositoryGenerator {
 		ConstraintGenerator = new ConstraintGenerator();
 	}
 	
-	public void generate(ArrayList<EJBClass> classes, ArrayList<Menu> menus, ArrayList<VisibleElement> elements, ArrayList<Enumeration> enumerations, Submenu rootMenu) {
+	public void generate(ArrayList<EJBClass> classes, ArrayList<Menu> menus, ArrayList<VisibleElement> elements, ArrayList<Enumeration> enumerations, Submenu rootMenu, boolean isParseForOriginalDb) {
 		DBConfigGenerator.geneateHibernateConfigXML("ApplicationRepository" + File.separator + "generated" + File.separator +  "db_config" + File.separator + "hibernate.cfg.xml");
 		DBConfigGenerator.generatePersistenceXMl(true);
 		EJBGenerator.generateEJBClasses(classes, false);
 		ConstraintGenerator.generateConstraints(classes, false);
-		EJBGenerator.generateEJBXmlFiles(classes, "ApplicationRepository" + File.separator + "generated" + File.separator +  "model" + File.separator + "ejb");		
+		EJBGenerator.generateEJBXmlFiles(classes, "ApplicationRepository" + File.separator + "generated" + File.separator +  "model" + File.separator + "ejb", isParseForOriginalDb);		
 		EJBGenerator.generateXMLMappingFile(classes, "REPO");
 		menuGenerator.generateMenu(menus);
 		menuGenerator.generateNewMenu(rootMenu);

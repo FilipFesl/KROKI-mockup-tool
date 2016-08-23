@@ -134,5 +134,4 @@ public class VisibleElement implements UmlNamedElement, Serializable {
     public void setParentGroup(ElementsGroup parentGroup) {
         this.parentGroup = parentGroup;
     }
-
 }

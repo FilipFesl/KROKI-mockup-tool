@@ -36,12 +36,12 @@ import java.util.Vector;
  * <a href="mailto:igord@uns.ns.ac.yu">igord@uns.ns.ac.yu</a>
  */
 public class Columns {
-    Hashtable columns;
-    Vector columnsVec;
+    Hashtable<String, Column> columns;
+    Vector<Column> columnsVec;
     
     public Columns(){
         super();
-        columns = new Hashtable();
+        columns = new Hashtable<String, Column>();
     }
     
     public Column getColumn(String aName){
@@ -54,7 +54,7 @@ public class Columns {
     
     public void putColumn(Column aColumn){
         if(columnsVec == null)
-            columnsVec = new Vector(10, 10);
+            columnsVec = new Vector<Column>(10, 10);
         columns.put(aColumn.getName(), aColumn);
         columnsVec.add(aColumn);
     }
@@ -69,10 +69,10 @@ public class Columns {
     public int size() {
         return columnsVec.size();
     }
-    public Vector getColumnsVec() {
+    public Vector<Column> getColumnsVec() {
         return columnsVec;
     }
-    public void setColumnsVec(Vector aColumnsVec) {
+    public void setColumnsVec(Vector<Column> aColumnsVec) {
         columnsVec = aColumnsVec;
         Enumeration iter = columnsVec.elements();
         while(iter.hasMoreElements()){

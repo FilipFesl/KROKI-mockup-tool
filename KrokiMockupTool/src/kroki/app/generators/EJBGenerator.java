@@ -43,7 +43,8 @@ public class EJBGenerator {
 
 	/***********************************************/
 	/*           EJB CLASS GENERATION              */
-	/***********************************************/
+	/**
+	 * @param isParseForOriginalDb *********************************************/
 	public void generateEJBClasses(ArrayList<EJBClass> classes, Boolean swing) {
 		cc = new NamingUtil();
 		Date now = new Date();
@@ -130,7 +131,7 @@ public class EJBGenerator {
 	/***********************************************/
 	/*        EJB XML FILES GENERATION             */
 	/***********************************************/
-	public void generateEJBXmlFiles(ArrayList<EJBClass> classes, String path) {
+	public void generateEJBXmlFiles(ArrayList<EJBClass> classes, String path, boolean isParseForOriginalDb) {
 		File f = new File(".");
 		String appPath = f.getAbsolutePath().substring(0,f.getAbsolutePath().length()-1);
 
@@ -176,56 +177,100 @@ public class EJBGenerator {
 				entityRoot.appendChild(attributes);
 
 				//---------------------------------ID COLUMN FOR EVERY CLASS
-				
-				Element idColumn = doc.createElement("column-attribute");
-
-				//atribut "name"
-				Attr idNameAttr = doc.createAttribute("name");
-				idNameAttr.setValue("id");
-				idColumn.setAttributeNode(idNameAttr);
-
-				//atribut "label"
-				Attr idLabelAttr = doc.createAttribute("label");
-				idLabelAttr.setValue("ID");
-				idColumn.setAttributeNode(idLabelAttr);
-
-				//atribut "field-name"
-				Attr idFieldNameAttr = doc.createAttribute("field-name");
-				idFieldNameAttr.setValue("id");
-				idColumn.setAttributeNode(idFieldNameAttr);
-
-				//atribut "type"
-				Attr idType = doc.createAttribute("type");
-				idType.setValue("java.lang.Long");
-				idColumn.setAttributeNode(idType);
-
-				//atribut "length"
-				Attr idLength = doc.createAttribute("length");
-				idLength.setValue("50");
-				idColumn.setAttributeNode(idLength);
-
-				//atribut "key"
-				Attr idKeyAttr = doc.createAttribute("key");
-				idKeyAttr.setValue("true");
-				idColumn.setAttributeNode(idKeyAttr);
-
-				//atribut "hidden"
-				Attr hiddenAttr = doc.createAttribute("hidden");
-				hiddenAttr.setValue("true");
-				idColumn.setAttributeNode(hiddenAttr);
-				
-				//atribut mandatory
-				Attr mandatoryAttr = doc.createAttribute("mandatory");
-				mandatoryAttr.setValue("true");
-				idColumn.setAttributeNode(mandatoryAttr);
-				
-				attributes.appendChild(idColumn);
-
+				if(!isParseForOriginalDb) {
+					Element idColumn = doc.createElement("column-attribute");
+	
+					//atribut "name"
+					Attr idNameAttr = doc.createAttribute("name");
+					idNameAttr.setValue("id");
+					idColumn.setAttributeNode(idNameAttr);
+	
+					//atribut "label"
+					Attr idLabelAttr = doc.createAttribute("label");
+					idLabelAttr.setValue("ID");
+					idColumn.setAttributeNode(idLabelAttr);
+	
+					//atribut "field-name"
+					Attr idFieldNameAttr = doc.createAttribute("field-name");
+					idFieldNameAttr.setValue("id");
+					idColumn.setAttributeNode(idFieldNameAttr);
+	
+					//atribut "type"
+					Attr idType = doc.createAttribute("type");
+					idType.setValue("java.lang.Long");
+					idColumn.setAttributeNode(idType);
+	
+					//atribut "length"
+					Attr idLength = doc.createAttribute("length");
+					idLength.setValue("50");
+					idColumn.setAttributeNode(idLength);
+	
+					//atribut "key"
+					Attr idKeyAttr = doc.createAttribute("key");
+					idKeyAttr.setValue("true");
+					idColumn.setAttributeNode(idKeyAttr);
+	
+					//atribut "hidden"
+					Attr hiddenAttr = doc.createAttribute("hidden");
+					hiddenAttr.setValue("true");
+					idColumn.setAttributeNode(hiddenAttr);
+					
+					//atribut mandatory
+					Attr mandatoryAttr = doc.createAttribute("mandatory");
+					mandatoryAttr.setValue("true");
+					idColumn.setAttributeNode(mandatoryAttr);
+					
+					attributes.appendChild(idColumn);
+				}
 				//-----------------------------------------------------------
 				// Generate <column-attribute> element for every EJB attribute
 				if(!clas.getAttributes().isEmpty()) {
 					for (EJBAttribute attribute : clas.getAttributes()) {
-						if(getAttributeType(attribute).equals("Column")) {
+						if(getAttributeType(attribute).equals("Id")){
+							Element idColumn = doc.createElement("column-attribute");
+							
+							//atribut "name"
+							Attr idNameAttr = doc.createAttribute("name");
+							idNameAttr.setValue(attribute.getName());
+							idColumn.setAttributeNode(idNameAttr);
+			
+							//atribut "label"
+							Attr idLabelAttr = doc.createAttribute("label");
+							idLabelAttr.setValue(attribute.getLabel());
+							idColumn.setAttributeNode(idLabelAttr);
+			
+							//atribut "field-name"
+							Attr idFieldNameAttr = doc.createAttribute("field-name");
+							idFieldNameAttr.setValue(attribute.getDatabaseName());
+							idColumn.setAttributeNode(idFieldNameAttr);
+			
+							//atribut "type"
+							Attr idType = doc.createAttribute("type");
+							idType.setValue(attribute.getType());
+							idColumn.setAttributeNode(idType);
+			
+							//atribut "length"
+							Attr idLength = doc.createAttribute("length");
+							idLength.setValue(String.valueOf(attribute.getLength()));
+							idColumn.setAttributeNode(idLength);
+			
+							//atribut "key"
+							Attr idKeyAttr = doc.createAttribute("key");
+							idKeyAttr.setValue("true");
+							idColumn.setAttributeNode(idKeyAttr);
+			
+							//atribut "hidden"
+							Attr hiddenAttr = doc.createAttribute("hidden");
+							hiddenAttr.setValue("true");
+							idColumn.setAttributeNode(hiddenAttr);
+							
+							//atribut mandatory
+							Attr mandatoryAttr = doc.createAttribute("mandatory");
+							mandatoryAttr.setValue("true");
+							idColumn.setAttributeNode(mandatoryAttr);
+							
+							attributes.appendChild(idColumn);
+						} else if(getAttributeType(attribute).equals("Column")) {
 							Element columnAttr = doc.createElement("column-attribute");
 
 							//atribut "name"
@@ -317,9 +362,20 @@ public class EJBGenerator {
 							}
 							zoomTag.setAttributeNode(classNameAttr);
 
+							String zoomedBy = "id";
+							if(isParseForOriginalDb) {
+								for(String annot : attribute.getAnnotations()){
+									if(annot.startsWith("@JoinColumn")) {
+										String startName = annot.substring(annot.indexOf("referencedColumnName=\"") + "referencedColumnName=\"".length(), annot.length());
+										zoomedBy = startName.substring(0, startName.indexOf("\""));
+										break;
+									}
+								}
+							}
+							
 							//atribut "zoomed-by"
 							Attr zoomedByAttr = doc.createAttribute("zoomed-by");
-							zoomedByAttr.setValue("id");
+							zoomedByAttr.setValue(zoomedBy);
 							zoomTag.setAttributeNode(zoomedByAttr);
 
 							//tag <column-ref> za id (ako nema ni jedan drugi)
@@ -327,7 +383,7 @@ public class EJBGenerator {
 
 							//atribut "name"
 							Attr colRefNameAttr = doc.createAttribute("name");
-							colRefNameAttr.setValue("id");
+							colRefNameAttr.setValue(zoomedBy);
 							columnRef.setAttributeNode(colRefNameAttr);
 
 							//atribut "label"
@@ -430,6 +486,8 @@ public class EJBGenerator {
 		String annotation = attribute.getAnnotations().get(0);
 		if(annotation.startsWith("@Column")) {
 			return "Column";
+		}else if (annotation.startsWith("@Id")) {
+			return "Id";
 		}else if (annotation.startsWith("@ManyToOne")) {
 			return "ManyToOne";
 		}else {

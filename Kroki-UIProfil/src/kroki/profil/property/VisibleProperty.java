@@ -44,6 +44,8 @@ public class VisibleProperty extends VisibleElement implements UmlProperty {
 
 	protected String enumeration;
 
+	protected boolean isPrimary = false;
+	
 	/*****************/
 	/* Constructors */
 	/*****************/
@@ -282,4 +284,11 @@ public class VisibleProperty extends VisibleElement implements UmlProperty {
 		this.persistentType = persistentType;
 	}
 
+	public boolean isPrimary() {
+		return isPrimary;
+	}
+
+	public void setPrimary(boolean isPrimary) {
+		this.isPrimary = isPrimary;
+	}
 }

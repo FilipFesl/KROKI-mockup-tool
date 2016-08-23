@@ -1,6 +1,7 @@
 package adapt.resources;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.persistence.Column;
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
 import javax.persistence.Query;
 
 import org.restlet.Context;
@@ -87,7 +90,8 @@ public class BaseResource extends Resource {
 		EntityManager em = PersisenceHelper.createEntityManager();
 		try {
 			Class claz = Class.forName(className);
-			return em.find(claz, Long.parseLong(id));
+			Object castId = EntityHelper.getTypeOfIdForEJB(className, id);
+			return em.find(claz, castId);
 		} catch (Exception e) {
 			return null;
 		}

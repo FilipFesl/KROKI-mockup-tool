@@ -1,7 +1,10 @@
 package adapt.util.ejb;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Iterator;
+
+import javax.persistence.Id;
 
 import adapt.exceptions.EntityAttributeNotFoundException;
 import adapt.model.ejb.AbstractAttribute;
@@ -252,4 +255,33 @@ public class EntityHelper {
 		return id;
 	}
 	
+	public static Object getTypeOfIdForEJB(String className, String id) {
+		Object castId = id;
+		try {
+			Class claz = Class.forName(className);
+			
+			Class idClass = Long.class;
+			
+			for (Field f : claz.getDeclaredFields()) {
+		        Annotation[] as = f.getAnnotations();
+		        for (Annotation a : as) {
+		            if (a.annotationType() == Id.class) {
+		            	idClass = f.getType();
+		            	break;
+		            }
+			   }
+			}
+			if(idClass.equals(Long.class)) {
+				castId = Long.parseLong(id);
+			} else if (idClass.equals(Integer.class)) {
+				castId = Integer.parseInt(id);
+			} else if (idClass.equals(String.class)) {
+				castId = id;
+			}
+		} catch (Exception e){
+			castId = Long.parseLong(id); //default (as it was before)
+			e.printStackTrace();
+		}
+		return castId;
+	}
 }

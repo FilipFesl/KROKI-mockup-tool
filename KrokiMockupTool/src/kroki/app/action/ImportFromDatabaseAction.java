@@ -37,10 +37,11 @@ public class ImportFromDatabaseAction extends AbstractAction {
 					
 					ArrayList<String> selectedTables = dbImportSettingsDialog.getTablesToParse();
 					String projectName = dbImportSettingsDialog.getProjectName();
+					Boolean parseForOriginalDb = dbImportSettingsDialog.isParseForOriginalDb();
 					if(projectName != null && selectedTables != null && selectedTables.size() > 0)
 					{
 						try{
-							new ImportDBMetaToProject(MetaDataRepository.getDefault().getTables(), projectName, selectedTables);
+							new ImportDBMetaToProject(MetaDataRepository.getDefault().getTables(), projectName, selectedTables, parseForOriginalDb);
 						}catch(Exception e){
 							e.printStackTrace(); 
 						}

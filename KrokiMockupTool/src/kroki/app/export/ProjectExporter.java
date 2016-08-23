@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import kroki.api.util.Util;
 import kroki.app.KrokiMockupToolApp;
 import kroki.app.analyzer.ConstraintAnalyzer;
 import kroki.app.exceptions.NoZoomPanelException;
@@ -39,6 +40,7 @@ import kroki.commons.camelcase.NamingUtil;
 import kroki.profil.ComponentType;
 import kroki.profil.VisibleElement;
 import kroki.profil.association.Zoom;
+import kroki.profil.group.ElementsGroup;
 import kroki.profil.panel.StandardPanel;
 import kroki.profil.panel.VisibleClass;
 import kroki.profil.panel.container.ParentChild;
@@ -145,8 +147,9 @@ public class ProjectExporter {
 		}
 		
 		//move the jdbc jar to buildProject lib so it gets included in the main .jar file
-		if(!"".equals(proj.getDBConnectionProps().getJarLocation())){
-			Path jdbcFilePath = Paths.get(proj.getDBConnectionProps().getJarLocation());
+		String jarLocation = proj.getDBConnectionProps().getJarLocation();
+		if(jarLocation != null && !"".equals(jarLocation)){
+			Path jdbcFilePath = Paths.get(jarLocation);
 			String jdbcFileName = jdbcFilePath.getFileName().toString();
 			Path target = Paths.get(
 					file.getAbsolutePath()+
@@ -185,7 +188,7 @@ public class ProjectExporter {
 		if (swing) {
 			menuGenerator.generateSWINGMenu(menus);
 			panelGenerator.generate(elements, null);
-			ejbGenerator.generateEJBXmlFiles(classes, null);
+			ejbGenerator.generateEJBXmlFiles(classes, null, proj.isParseForOriginalDB());
 			ejbGenerator.generateEJBClasses(classes, true);
 			ejbGenerator.generateXMLMappingFile(classes, null);
 			constraintGenerator.generateConstraints(classes, true);
@@ -193,7 +196,7 @@ public class ProjectExporter {
 			enumGenerator.generateXMLFiles(enumerations);
 			enumGenerator.generateEnumFiles(enumerations);
 		} else {
-			appRepoGenerator.generate(classes, menus, elements, enumerations, rootMenu);
+			appRepoGenerator.generate(classes, menus, elements, enumerations, rootMenu, proj.isParseForOriginalDB());
 			// MainFrame.getInstance(); // If admin subsystem isn't started
 			// adminGenerator.generate();
 		}
@@ -281,14 +284,17 @@ public class ProjectExporter {
 		List<String> importedPackages = new ArrayList<String>();
 		importedPackages.add("import adapt.exceptions.InvariantException;");
 
+
+		Boolean isParseForOriginalDB = project.isParseForOriginalDB();
 		// DATA USED FOR EJB CLASS GENERATION
 		// for each panel element, one EJB attribute object is created and added
 		// to attributes list for that panel
-		for (VisibleElement element : sp.getVisibleElementList()) {
+		for (VisibleElement element : sp.getVisibleElementList()) {		
 			if (element instanceof VisibleProperty) {
 				VisibleProperty vp = (VisibleProperty) element;
 				EJBAttribute attribute = getVisiblePropertyData(vp);
 				attributes.add(attribute);
+				
 				if (element instanceof Calculated) {
 					String expression = ((Calculated) element).getExpression();
 					try {
@@ -311,8 +317,13 @@ public class ProjectExporter {
 			}
 		}
 
-		String tableName = cc.toDatabaseFormat(this.project.getLabel(), sp.getLabel());
-
+		String tableName;
+		if(isParseForOriginalDB!=null && !isParseForOriginalDB){
+			tableName = cc.toDatabaseFormat(this.project.getLabel(), sp.getLabel());
+		} else {
+			tableName = sp.getLabel();
+		}
+		
 		String sys = cc.toCamelCase(project.getLabel(), true);
 		if (menu != null) {
 			sys = cc.toCamelCase(menu.getLabel(), true);
@@ -335,6 +346,7 @@ public class ProjectExporter {
 		EJBClass ejb = new EJBClass(pack, sys, sp.getPersistentClass().name(), tableName, sp.getLabel(), attributes,
 				constraints);
 		ejb.setImportedPackages(importedPackages);
+		ejb.setIsParseForOriginalDB(isParseForOriginalDB);
 		System.out.println("DODAJEM KLASU: " + ejb.getName());
 		classes.add(ejb);
 
@@ -473,7 +485,15 @@ public class ProjectExporter {
 		 * TODO Prefiks se za sada koristi jer puca ako je ime nekog polja
 		 * rezervisana rec u programskom jeziku.
 		 */
-		String name = "ka_" + cc.toCamelCase(vp.name(), true);
+		String name; 
+		
+		Boolean isParseForOriginalDB = project.isParseForOriginalDB();
+		if(isParseForOriginalDB!=null && !isParseForOriginalDB){
+			name = "ka_" + cc.toCamelCase(vp.name(), true);
+		} else {
+			name = cc.toCamelCase(vp.name(), true);
+		}
+		
 		String label = vp.getLabel();
 		String columnLabel = cc.stripIllegealChars(vp.getColumnLabel());
 		int length = vp.getLength();
@@ -490,8 +510,24 @@ public class ProjectExporter {
 		
 		boolean mandatory = vp.lower() != 0;
 	
-		anotations.add("@Column(name = \"" + columnLabel + "\", unique = false, nullable = " + !mandatory + lenPrecAnnotation
-				+ ",columnDefinition = \"" + vp.getPersistentType().toUpperCase() + "\")");
+		String persistentLength = "";
+		if(!(vp.getLength() <= 0)){
+			if(vp.getPersistentType().equals("Decimal")){
+				persistentLength+="("+vp.getLength()+","+vp.getPrecision()+")";
+			}else{
+				persistentLength+="("+vp.getLength()+")";
+			}
+		}
+		
+		if(project.isParseForOriginalDB() && vp.isPrimary()){
+			anotations.add("@Id");
+			anotations.add("@GeneratedValue(strategy = IDENTITY)");
+			anotations.add("@Column(name = \"" + columnLabel + "\", unique = true, nullable = false, "
+					+ "columnDefinition = \"" + vp.getPersistentType().toUpperCase() + persistentLength + "\")");
+		} else {
+			anotations.add("@Column(name = \"" + columnLabel + "\", unique = false, nullable = " + !mandatory + lenPrecAnnotation
+					+ ",columnDefinition = \"" + vp.getPersistentType().toUpperCase() + persistentLength + "\")");
+		}
 		EJBAttribute attribute = new EJBAttribute(anotations, type, name, label, columnLabel, length, precision, mandatory,
 				false, vp.isRepresentative(), enumeration);
 		return attribute;
@@ -523,10 +559,27 @@ public class ProjectExporter {
 				String label = z.getLabel();
 				Boolean mandatory = z.lower() != 0;
 
-				anotations.add("@ManyToOne");
-				anotations.add("@JoinColumn(name=\"" + propName + "\", referencedColumnName=\"ID\",  nullable = "
-						+ !mandatory + ")");
-
+				Boolean isParseForOriginalDB = project.isParseForOriginalDB();
+				if(!isParseForOriginalDB){
+					anotations.add("@ManyToOne");
+					anotations.add("@JoinColumn(name=\"" + propName + "\", referencedColumnName=\"ID\",  nullable = "
+							+ !mandatory + ")");
+				} else {
+					String refColName = label;
+					ElementsGroup group = (ElementsGroup) vc.getVisibleElementList().get(Util.STANDARD_PANEL_PROPERTIES);
+					for(VisibleElement element : group.getVisibleElementList()) {
+						if(element instanceof VisibleProperty && ((VisibleProperty) element).isPrimary()) {
+							refColName = element.getLabel();
+						}
+					}
+					spanel.getPersistentClass().ownedAttribute();
+					
+					anotations.add("@ManyToOne");
+					anotations.add("@JoinColumn(name=\"" + name + "\", referencedColumnName=\""+refColName+"\",  nullable = "
+							+ !mandatory + ")");
+				}
+				
+				
 				// Length and precision for zoom fields are left 0, which
 				// indicates they are ignored on the template
 				EJBAttribute attribute = new EJBAttribute(anotations, type, propName, label, databaseName, 0, 0,

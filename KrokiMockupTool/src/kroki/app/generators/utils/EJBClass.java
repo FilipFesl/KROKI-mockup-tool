@@ -20,6 +20,8 @@ public class EJBClass {
 	private ArrayList<Constraint> constraints = new ArrayList<Constraint>();
 	private List<String> importedPackages = new ArrayList<String>();
 	private ArrayList<Operation> operations = new ArrayList<Operation>();
+	
+	private Boolean isParseForOriginalDB = false;
 //	private ArrayList<Attribute> attributes;
 //	private ArrayList<ManyToOneAttribute> manyToOneAttributes;
 //	private ArrayList<OneToManyAttribute> oneToManyAttributes;
@@ -138,6 +140,16 @@ public class EJBClass {
 
 	public void setOperations(ArrayList<Operation> operations) {
 		this.operations = operations;
+	}
+
+
+	public Boolean getIsParseForOriginalDB() {
+		return isParseForOriginalDB;
+	}
+
+
+	public void setIsParseForOriginalDB(Boolean isParseForOriginalDB) {
+		this.isParseForOriginalDB = isParseForOriginalDB;
 	}
 	
 }

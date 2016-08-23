@@ -40,6 +40,8 @@ public class BussinesSubsystem extends VisibleElement implements UmlPackage {
 	private boolean labelToCode = true;
 	private String projectDescription;
 
+	private boolean isParseForOriginalDB = false;
+
 	public BussinesSubsystem(BussinesSubsystem owner) {
 		super();
 		this.nestingPackage = owner;
@@ -214,5 +216,13 @@ public class BussinesSubsystem extends VisibleElement implements UmlPackage {
 
 	public void setProjectDescription(String projectDescription) {
 		this.projectDescription = projectDescription;
+	}
+	
+	public boolean isParseForOriginalDB() {
+		return isParseForOriginalDB;
+	}
+
+	public void setParseForOriginalDB(boolean isParseForOriginalDB) {
+		this.isParseForOriginalDB = isParseForOriginalDB;
 	}
 }

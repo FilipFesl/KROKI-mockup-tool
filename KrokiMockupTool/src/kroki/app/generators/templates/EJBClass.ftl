@@ -29,10 +29,12 @@ public class ${class.name} implements java.io.Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	<#if !class.isParseForOriginalDB>
 	@Id 
 	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "ID", unique = true, nullable = false)
 	protected java.lang.Long id;
+	</#if>
 
 	<#if class.attributes?has_content>
 	<#list class.attributes as attr>
@@ -46,6 +48,7 @@ public class ${class.name} implements java.io.Serializable {
 	public ${class.name}(){
 	}
 	
+	<#if !class.isParseForOriginalDB>
 	public Long getId() {
 		return id;
 	}
@@ -53,6 +56,7 @@ public class ${class.name} implements java.io.Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	</#if>
 	
 	<#if class.attributes?has_content>
 	<#list class.attributes as attr>

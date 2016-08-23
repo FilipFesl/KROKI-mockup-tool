@@ -71,13 +71,19 @@
                 <#list tableModel as row>
                 <tr>
                     <#list panel.entityBean.attributes as attribute>
-                    <#if attribute.fieldName == "id">
-                    <td id="idCell" data-attrName="id" style="display:none;">${row[attribute.fieldName]}</td>
-                    <#else>
-                    <#if attribute.hidden == false>
-                    <td title="${row[attribute.fieldName]}" data-attrName="${attribute.fieldName}">${row[attribute.fieldName]}</td>    
+					<#if attribute.key??>
+						<#if attribute.key>
+						<td id="idCell" data-attrName="id" style="display:none;">${row[attribute.fieldName]}</td>
+						<#else>
+						<#if attribute.hidden == false>
+						<td title="${row[attribute.fieldName]}" data-attrName="${attribute.fieldName}">${row[attribute.fieldName]}</td>    
+						</#if>
                     </#if>
-                    </#if>
+					<#else>
+						<#if attribute.hidden == false>
+						<td title="${row[attribute.fieldName]}" data-attrName="${attribute.fieldName}">${row[attribute.fieldName]}</td>    
+						</#if>
+					</#if>
                     </#list>
                 </tr>
                 </#list>

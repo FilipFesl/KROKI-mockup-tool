@@ -41,6 +41,8 @@ public class DBImportSettingsDialog extends JDialog {
 	private JLabel lblProjectName;
 	private JTextField tfProjectName;	
 	
+	private JCheckBox cbExportRealDb;
+	
 	private JButton btnSelectAll;
 	private JButton btnSelectNone;
 	
@@ -48,6 +50,7 @@ public class DBImportSettingsDialog extends JDialog {
 	
 	private ArrayList<String> tablesToParse;
 	private String projectName;
+	private Boolean parseForOriginalDB;
 	
 	public DBImportSettingsDialog(Connection conn) {
 		this.conn = conn;
@@ -71,7 +74,7 @@ public class DBImportSettingsDialog extends JDialog {
 	
 	public void initGUI() {
 
-		lblTitle = new JLabel("Select tables for import");
+		lblTitle = new JLabel("Configure DB import settings");
 		lblTitle.setFont(new Font("sansserif", Font.PLAIN, 16));
 
 		btnOK = new JButton("OK");
@@ -108,6 +111,8 @@ public class DBImportSettingsDialog extends JDialog {
 			}
 		});
 		
+		cbExportRealDb = new JCheckBox("Configure project to export for same DB?");
+				
 		Dimension separatorDim = new Dimension(350, 5);
 		JSeparator topSep = new JSeparator(JSeparator.HORIZONTAL);
 		topSep.setPreferredSize(separatorDim);
@@ -126,9 +131,11 @@ public class DBImportSettingsDialog extends JDialog {
 		lblProjectName = new JLabel("Project name");
 		tfProjectName = new JTextField(20);
 		
+		add(cbExportRealDb, "wrap");
+		
 		add(lblProjectName);
 		add(tfProjectName, "wrap");
-		
+
 		add(bottomSep, "span 2, wrap, gaptop 5, growx");
 		add(new JLabel());
 		add(btnOK, "split 2, gaptop 5");
@@ -137,7 +144,6 @@ public class DBImportSettingsDialog extends JDialog {
 		pack();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private CheckBoxList getCheckboxListWithData(){
 		try {
 			MetaDataRepository.getDefault().readFromDB(conn);
@@ -174,6 +180,7 @@ public class DBImportSettingsDialog extends JDialog {
         	}else {
         		projectName = tfProjectName.getText();
         		tablesToParse = cbList.getSelectedCheckboxNames();
+        		parseForOriginalDB = cbExportRealDb.isSelected();
 				dispose();
         	}
         }
@@ -185,5 +192,9 @@ public class DBImportSettingsDialog extends JDialog {
 	
 	public String getProjectName(){
 		return projectName;
+	}
+	
+	public Boolean isParseForOriginalDb(){
+		return parseForOriginalDB;
 	}
 }

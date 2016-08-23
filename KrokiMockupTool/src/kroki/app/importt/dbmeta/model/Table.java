@@ -24,7 +24,10 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+
+import kroki.app.importt.dbmeta.MetaDataRepository;
 
 /**
  * 
@@ -39,6 +42,7 @@ import java.util.Hashtable;
 public class Table {
     private String name;
     private Columns columns;
+    private ArrayList<ColumnFKReferences> columnFKReferences = new ArrayList<ColumnFKReferences>();
     
     private Connection conn;
     
@@ -46,6 +50,7 @@ public class Table {
         super();
         name = aTableName;
         conn = aConn;
+        this.setColumnFKReferences(getFKReferences());
         initColumns();
     }
 
@@ -55,14 +60,16 @@ public class Table {
      */
     private void initColumns() throws SQLException {
         columns = new Columns();
-        Hashtable pkCols = getPKCols();
-        Hashtable fkCols = getFKCols();
+        Hashtable<String, String> pkCols = getPKCols();
+        Hashtable<String, String> fkCols = getFKCols();
+        
         DatabaseMetaData dbMeta = conn.getMetaData();
         ResultSet rst = dbMeta.getColumns(null, null, name, null);
 	    while(rst.next()){
 	    	Column col = new Column();
 	    	col.setName(rst.getString("COLUMN_NAME"));
 	    	col.setType(rst.getString("TYPE_NAME"));
+	    	col.setSQLDataType(rst.getInt("DATA_TYPE"));
 	    	col.setLength(rst.getInt("COLUMN_SIZE"));
 	    	col.setDecimalDigits(rst.getInt("DECIMAL_DIGITS"));
 	    	col.setNullable(rst.getInt("NULLABLE") == DatabaseMetaData.columnNullable ? true : false);
@@ -77,8 +84,8 @@ public class Table {
      * @return
      * @throws SQLException
      */
-    private Hashtable getPKCols() throws SQLException {
-        Hashtable pkCols = new Hashtable();
+    private Hashtable<String, String> getPKCols() throws SQLException {
+        Hashtable<String, String> pkCols = new Hashtable<String, String>();
         DatabaseMetaData dbMeta = conn.getMetaData();
         ResultSet rst = dbMeta.getPrimaryKeys(null, null, name);
 	    while(rst.next()){
@@ -91,15 +98,46 @@ public class Table {
      * @return
      * @throws SQLException
      */
-    private Hashtable getFKCols() throws SQLException {
-        Hashtable fkCols = new Hashtable();
+    private Hashtable<String, String> getFKCols() throws SQLException {
+        Hashtable<String, String> fkCols = new Hashtable<String, String>();
         DatabaseMetaData dbMeta = conn.getMetaData();
         ResultSet rst = dbMeta.getImportedKeys(null, null, name);
 	    while(rst.next()){
-	    		fkCols.put(rst.getString("FKCOLUMN_NAME"), rst.getString("FKCOLUMN_NAME"));
+	    	fkCols.put(rst.getString("FKCOLUMN_NAME"), rst.getString("FKCOLUMN_NAME"));
     	}        
-        return fkCols;
+	    return fkCols;
+	}        
+    
+	private ArrayList<ColumnFKReferences> getFKReferences() throws SQLException {
+		ArrayList<ColumnFKReferences> columnFKReferences = new ArrayList<ColumnFKReferences>();
+        DatabaseMetaData dbMeta = conn.getMetaData();
+	    ResultSet rst = dbMeta.getExportedKeys(null, null, name);
+	    while(rst.next()){
+	    	ColumnFKReferences colFkRef = new ColumnFKReferences();
+	    	colFkRef.setTableName(rst.getString("PKTABLE_NAME"));
+	   		colFkRef.setTableColumnName(rst.getString("PKCOLUMN_NAME"));
+	   		colFkRef.setForeignTableName(rst.getString("FKTABLE_NAME"));
+	   		colFkRef.setForeignTableColumn(rst.getString("FKCOLUMN_NAME"));
+	   		columnFKReferences.add(colFkRef);
+	    }		
+	    return columnFKReferences;
     }
+	
+	public void calculateFkRefs() {
+		Tables tables = MetaDataRepository.getDefault().getTables();
+		for(Column column : columns.getColumnsVec()) {
+			if(column.isPartOfFK()){
+				for(Table table : tables.getTablesList()){
+					for(ColumnFKReferences ref : table.columnFKReferences) {
+						if(ref.getForeignTableColumn().equals(column.getName()) && ref.getForeignTableName().equals(name)) {
+							column.setFkColumnName(ref.getTableColumnName());
+							column.setFkTableName(ref.getTableName());
+						}
+					}
+				}
+			}
+		}
+	}
 
     public Table(){
         super();
@@ -135,4 +173,12 @@ public class Table {
     public String toString() {
         return name;
     }
+
+	public ArrayList<ColumnFKReferences> getColumnFKReferences() {
+		return columnFKReferences;
+	}
+
+	public void setColumnFKReferences(ArrayList<ColumnFKReferences> columnFKReferences) {
+		this.columnFKReferences = columnFKReferences;
+	}
 }

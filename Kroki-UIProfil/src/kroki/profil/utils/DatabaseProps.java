@@ -30,7 +30,7 @@ public class DatabaseProps implements Serializable {
 		username = "test";
 		password = "test";
 		jdbcURL = "";
-		setJarLocation("");
+		jarLocation = "";
 	}
 	
 	public DatabaseProps(int profile, String driverClass, String host, int port, String schema, String username, String password, String dialect) {
@@ -44,7 +44,7 @@ public class DatabaseProps implements Serializable {
 		this.password = password;
 		this.dialect = dialect;
 		this.jdbcURL = "";
-		this.setJarLocation("");
+		this.jarLocation = "";
 	}
 
 	public DatabaseProps(String driverClass, String jdbcURL, String username, String password, String dialect, String jarLocation) {
