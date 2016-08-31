@@ -20,6 +20,8 @@ public class DatabaseProps implements Serializable {
 	private String jdbcURL;
 	private String jarLocation;	
 	
+	private boolean createSchemaOnExport = true;
+	
 	public DatabaseProps() {
 		profile = 5;
 		driverClass = "org.h2.Driver";
@@ -135,5 +137,13 @@ public class DatabaseProps implements Serializable {
 
 	public void setJarLocation(String jarLocation) {
 		this.jarLocation = jarLocation;
+	}
+
+	public boolean isCreateSchemaOnExport() {
+		return createSchemaOnExport;
+	}
+
+	public void setCreateSchemaOnExport(boolean createSchemaOnExport) {
+		this.createSchemaOnExport = createSchemaOnExport;
 	}
 }

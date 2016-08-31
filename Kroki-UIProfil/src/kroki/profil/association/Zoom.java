@@ -19,6 +19,8 @@ public class Zoom extends VisibleAssociationEnd {
      * of the target class
      */
     protected boolean combozoom = true;
+    
+    protected boolean isCompositePrimary = false;
 
     public Zoom(VisibleProperty visibleProperty) {
         this.label = visibleProperty.getLabel();
@@ -39,5 +41,13 @@ public class Zoom extends VisibleAssociationEnd {
 
     public void setCombozoom(boolean combozoom) {
         this.combozoom = combozoom;
+    }
+    
+    public boolean isCompositePrimary() {
+        return isCompositePrimary;
+    }
+
+    public void setCompositePrimary(boolean isCompositePrimary) {
+        this.isCompositePrimary = isCompositePrimary;
     }
 }

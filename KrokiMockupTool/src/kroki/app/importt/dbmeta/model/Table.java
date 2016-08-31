@@ -75,6 +75,9 @@ public class Table {
 	    	col.setNullable(rst.getInt("NULLABLE") == DatabaseMetaData.columnNullable ? true : false);
 	    	col.setPartOfPK(pkCols.containsKey(rst.getString("COLUMN_NAME")));
 	    	col.setPartOfFK(fkCols.containsKey(rst.getString("COLUMN_NAME")));
+	    	if(pkCols.containsKey(rst.getString("COLUMN_NAME")) && pkCols.size() > 1){
+	    		col.setPartOfCompositePK(true);
+	    	}
 	        columns.putColumn(col);
     	}       
         

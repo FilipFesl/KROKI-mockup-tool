@@ -3,36 +3,21 @@ package kroki.app.importt;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
-import javax.persistence.criteria.CriteriaBuilder.Case;
 import javax.swing.JOptionPane;
-
-import org.eclipse.uml2.uml.Property;
-import org.eclipse.uml2.uml.internal.impl.ClassImpl;
 
 import kroki.api.commons.ApiCommons;
 import kroki.api.util.Util;
-import kroki.api.commons.ApiCommons;
 import kroki.app.KrokiMockupToolApp;
 import kroki.app.importt.dbmeta.model.Column;
 import kroki.app.importt.dbmeta.model.Columns;
 import kroki.app.importt.dbmeta.model.Table;
 import kroki.app.importt.dbmeta.model.Tables;
 import kroki.app.utils.uml.ProgressWorker;
-import kroki.app.utils.uml.UMLElementsEnum;
-import kroki.app.utils.uml.stereotypes.PropertyStereotype;
-
-import kroki.commons.camelcase.NamingUtil;
 import kroki.profil.ComponentType;
-import kroki.profil.VisibleElement;
-import kroki.profil.association.Hierarchy;
-import kroki.profil.association.Next;
 import kroki.profil.association.Zoom;
 
 import kroki.profil.group.ElementsGroup;
@@ -169,6 +154,10 @@ public class ImportDBMetaToProject extends ProgressWorker {
 					zoom.setActivationPanel(startingPanel);
 					zoom.setTargetPanel((VisibleClass) targetPanel);
 
+					if(parseForOriginalDb && column.isPartOfCompositePK()) {
+						zoom.setCompositePrimary(true);
+					}
+					
 					ElementsGroupUtil.addVisibleElement(element, zoom);
 					UIPropertyUtil.addVisibleElement(startingPanel,zoom);
 
@@ -194,6 +183,10 @@ public class ImportDBMetaToProject extends ProgressWorker {
 			return;
 		}
 
+		if(property.getComponentType().equals(ComponentType.TEXT_FIELD) && property.getLength() >= 100) {
+			property.setComponentType(ComponentType.TEXT_AREA);
+		}
+		
 		property.setLabelToCode(false);
 		property.setLength(column.getLength());
 		property.setPrecision(column.getDecimalDigits());
@@ -205,7 +198,9 @@ public class ImportDBMetaToProject extends ProgressWorker {
 		if(column.isPartOfPK()) {
 			property.setPrimary(true);
 		}
-		
+		if(parseForOriginalDb && column.isPartOfCompositePK()) {
+			property.setCompositePrimary(true);
+		}
 		if(parseForOriginalDb) {
 			property.setColumnLabel(column.getName());
 		}

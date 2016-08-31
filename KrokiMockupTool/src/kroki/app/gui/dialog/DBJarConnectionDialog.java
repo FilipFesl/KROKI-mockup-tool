@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -62,6 +63,8 @@ public class DBJarConnectionDialog extends JDialog {
 	private JButton btnOK;
 	private JButton btnCancel;
 
+	private JCheckBox jCbxDropAndCreateTables;
+	
 	private Boolean forKrokiProject;
 	
 	public DBJarConnectionDialog(BussinesSubsystem project, Boolean forKrokiProject) {
@@ -147,6 +150,7 @@ public class DBJarConnectionDialog extends JDialog {
 			}
 		});
 
+		
 		testPane.setLayout(new MigLayout(
 				"",
 				"[left, grow][right]",
@@ -212,6 +216,13 @@ public class DBJarConnectionDialog extends JDialog {
 
 		add(lblPassword);
 		add(pfPassword, "wrap");
+		
+		if(forKrokiProject){
+			jCbxDropAndCreateTables = new JCheckBox("Drop and create tables on project export?");
+			jCbxDropAndCreateTables.setSelected(true);
+			add(new JLabel());
+			add(jCbxDropAndCreateTables, "wrap");
+		}
 
 		add(middleSep, "span 2, wrap, gaptop 5, growx");
 		add(testPane, "wrap, span 2, grow");
@@ -240,6 +251,9 @@ public class DBJarConnectionDialog extends JDialog {
 				}
 				
 				DatabaseProps props = new DatabaseProps(driver,jdbcURL,username,password,dialect,jarLocation);
+				if(forKrokiProject){
+					props.setCreateSchemaOnExport(jCbxDropAndCreateTables.isSelected());
+				}
 				project.setDBConnectionProps(props);
 	
 				conn.close();

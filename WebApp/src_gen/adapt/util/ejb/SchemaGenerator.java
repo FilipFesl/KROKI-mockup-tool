@@ -15,6 +15,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import adapt.util.repository_utils.RepositoryPathsUtil;
+import adapt.util.staticnames.Settings;
 
 /**
  * @author john.thompson
@@ -27,10 +28,13 @@ public class SchemaGenerator {
 		cfg = new Configuration();
 		cfg.setProperty("hibernate.hbm2ddl.auto","update");
 
-		ArrayList<Class> classes = (ArrayList<Class>) getClasses(packageName);
-		for(int i=0; i<classes.size(); i++) {
-			Class clazz = classes.get(i);
-			cfg.addAnnotatedClass(clazz);
+		ArrayList<Class> classes = (ArrayList<Class>) getClasses(packageName); //contains adapt classes, we leave them
+		boolean dropAndCreateSchema = Boolean.parseBoolean(Settings.SCHEMA_CREATE_DROP);
+		if(dropAndCreateSchema) {
+			for(int i=0; i<classes.size(); i++) {
+				Class clazz = classes.get(i);
+				cfg.addAnnotatedClass(clazz);
+			}
 		}
 	}
 

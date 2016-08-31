@@ -519,7 +519,7 @@ public class ProjectExporter {
 			}
 		}
 		
-		if(project.isParseForOriginalDB() && vp.isPrimary()){
+		if(project.isParseForOriginalDB() && (vp.isPrimary() || vp.isCompositePrimary())){
 			anotations.add("@Id");
 			anotations.add("@GeneratedValue(strategy = IDENTITY)");
 			anotations.add("@Column(name = \"" + columnLabel + "\", unique = true, nullable = false, "
@@ -530,6 +530,10 @@ public class ProjectExporter {
 		}
 		EJBAttribute attribute = new EJBAttribute(anotations, type, name, label, columnLabel, length, precision, mandatory,
 				false, vp.isRepresentative(), enumeration);
+		
+		if(project.isParseForOriginalDB() && vp.isCompositePrimary()) {
+			attribute.setCompositePrimary(true);
+		}
 		return attribute;
 	}
 
@@ -558,8 +562,14 @@ public class ProjectExporter {
 				String databaseName = z.getLabel().substring(0, 1).toLowerCase() + z.getLabel().substring(1);
 				String label = z.getLabel();
 				Boolean mandatory = z.lower() != 0;
+				
 
 				Boolean isParseForOriginalDB = project.isParseForOriginalDB();
+				
+				if(isParseForOriginalDB && z.isCompositePrimary()) {
+					anotations.add("@Id");
+				}
+
 				if(!isParseForOriginalDB){
 					anotations.add("@ManyToOne");
 					anotations.add("@JoinColumn(name=\"" + propName + "\", referencedColumnName=\"ID\",  nullable = "
@@ -584,6 +594,9 @@ public class ProjectExporter {
 				// indicates they are ignored on the template
 				EJBAttribute attribute = new EJBAttribute(anotations, type, propName, label, databaseName, 0, 0,
 						mandatory, false, false, null);
+				if(isParseForOriginalDB && z.isCompositePrimary()) {
+					attribute.setCompositePrimary(true);
+				}
 				return attribute;
 			} else {
 				return null;
@@ -651,7 +664,7 @@ public class ProjectExporter {
 				EJBAttribute attribute = ejbClass.getAttributes().get(j);
 				if (getAttributeType(attribute).equals("ManyToOne")) {
 					EJBClass oppositeCLass = getClass(attribute.getType());
-					if (oppositeCLass != null) {
+					if (oppositeCLass != null && !attribute.isCompositePrimary()) {
 						// String name = ejbClass.getName() + "Set";//OVO JE
 						// BILO ORIGINALNO
 						String name = attribute.getName() + "Set";
@@ -743,7 +756,8 @@ public class ProjectExporter {
 				appPath + "SwingApp" + File.separator + "props" + File.separator + "main-generated.properties");
 		String toAppendName = "main.form.name";
 		String toAppendDescription = "app.description";
-
+		String toAppendSchemaGen = "app.schema.create";
+		
 		if (!swing) {
 			propertiesFile = new File(appPath + "ApplicationRepository" + File.separator + "generated" + File.separator
 					+ "props" + File.separator + "main.properties");
@@ -758,14 +772,15 @@ public class ProjectExporter {
 		if (!swing) {
 			lines.add(toAppendDescription + " = " + description);
 		}
+		
+		lines.add(toAppendSchemaGen + " = " + project.getDBConnectionProps().isCreateSchemaOnExport());
+		
 		try {
 			scan = new Scanner(propertiesFile);
 			while (scan.hasNext()) {
 				String line = scan.nextLine();
-				if (!line.startsWith(toAppendName)) {
-					if (!line.startsWith(toAppendDescription)) {
-						lines.add(line);
-					}
+				if (!line.startsWith(toAppendName) && !line.startsWith(toAppendDescription) && !line.startsWith(toAppendSchemaGen)) {
+					lines.add(line);
 				}
 			}
 			scan.close();

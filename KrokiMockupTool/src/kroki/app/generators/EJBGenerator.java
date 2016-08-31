@@ -487,6 +487,10 @@ public class EJBGenerator {
 		if(annotation.startsWith("@Column")) {
 			return "Column";
 		}else if (annotation.startsWith("@Id")) {
+			if(attribute.isCompositePrimary() && attribute.getAnnotations().size() > 1 
+					&& attribute.getAnnotations().get(1).startsWith("@ManyToOne")){ //composite primary is zoom
+				return "ManyToOne";
+			}
 			return "Id";
 		}else if (annotation.startsWith("@ManyToOne")) {
 			return "ManyToOne";

@@ -17,6 +17,8 @@ public class EJBAttribute {
 	private Enumeration enumeration;
 	private ArrayList<EJBAttribute> columnRefs;
 	
+	private boolean isCompositePrimary = false;
+	
 	public EJBAttribute(ArrayList<String> annotations, String type,
 			String name, String label, String databaseName, int length,
 			int precision, Boolean mandatory, Boolean unique,
@@ -130,5 +132,13 @@ public class EJBAttribute {
 
 	public void setPrecision(int precision) {
 		this.precision = precision;
+	}
+
+	public boolean isCompositePrimary() {
+		return isCompositePrimary;
+	}
+
+	public void setCompositePrimary(boolean isCompositePrimary) {
+		this.isCompositePrimary = isCompositePrimary;
 	}
 }

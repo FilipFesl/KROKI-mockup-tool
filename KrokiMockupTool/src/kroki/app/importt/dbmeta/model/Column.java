@@ -35,6 +35,7 @@ public class Column {
     private String name;
     private boolean partOfPK = false;
     private boolean partOfFK = false;
+    private boolean partOfCompositePK = false;
     private String type;
     private int sqlDataType; //corresponds with java.sql.Types (jdbc types)
     private int length = 0;
@@ -156,5 +157,13 @@ public class Column {
 	
 	public void setFkTableName(String fkTableName) {
 		this.fkTableName = fkTableName;
+	}
+	
+	public boolean isPartOfCompositePK() {
+		return partOfCompositePK;
+	}
+	
+	public void setPartOfCompositePK(boolean partOfCompositePK) {
+		this.partOfCompositePK = partOfCompositePK;
 	}
 }

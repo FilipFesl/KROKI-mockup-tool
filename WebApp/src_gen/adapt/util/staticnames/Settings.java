@@ -27,4 +27,6 @@ public class Settings {
 	public static final String WINDOW_ICON = PropertiesReader.readStaticProp("main", "windows.icon");
 	public static final String WEB_MAINFRAME_ICON =  PropertiesReader.readStaticProp("main", "web.main.icon");
 	public static final String DEPLOY = PropertiesReader.readStaticProp("main", "deploy");
+	
+	public static final String SCHEMA_CREATE_DROP = PropertiesReader.readGeneratedProp("main", "app.schema.create");
 }

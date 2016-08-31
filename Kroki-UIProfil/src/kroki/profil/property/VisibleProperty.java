@@ -45,7 +45,7 @@ public class VisibleProperty extends VisibleElement implements UmlProperty {
 	protected String enumeration;
 
 	protected boolean isPrimary = false;
-	
+	protected boolean isCompositePrimary = false;
 	/*****************/
 	/* Constructors */
 	/*****************/
@@ -290,5 +290,13 @@ public class VisibleProperty extends VisibleElement implements UmlProperty {
 
 	public void setPrimary(boolean isPrimary) {
 		this.isPrimary = isPrimary;
+	}
+
+	public void setCompositePrimary(boolean isCompositePrimary) {
+		this.isCompositePrimary = isCompositePrimary;
+	}
+	
+	public boolean isCompositePrimary(){
+		return this.isCompositePrimary;
 	}
 }
